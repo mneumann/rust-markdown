@@ -11,13 +11,14 @@ use extra::test::BenchHarness;
 
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
+static STAR: u8 = '*' as u8;
+static DASH: u8 = '-' as u8;
+static UNDERSCORE: u8 = '_' as u8;
 
 /// Returns Some(`rem`) if the line is a horizontal rule, with `rem` being the
 /// buf after the hrule. Otherwise returns None.
 fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     let mut buf = buf;
-
-    if buf.len() < 3 { return None }
 
     // Skip up to three leading spaces.
     //
@@ -28,14 +29,12 @@ fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     if buf.head() == Some(&SP) { buf = buf.tail(); }
     if buf.head() == Some(&SP) { buf = buf.tail(); }
 
-    // We need at least 3 items
-    if buf.len() < 3 { return None } 
-
-    let item = buf[0];
-
-    if !(item == ('*' as u8) || item == ('-' as u8) || item == ('_' as u8)) {
-        return None;
-    }
+    let item = match buf.head() {
+        Some(&c) if c == STAR ||
+                    c == DASH ||
+                    c == UNDERSCORE => c,
+        _                           => return None
+    };
 
     // The count of '*', '-' or '_'
     let mut cnt: uint = 0;
