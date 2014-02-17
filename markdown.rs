@@ -21,7 +21,8 @@ fn is_hrule(buf: &[u8]) -> bool {
     // Skip up to three leading spaces.
     //
     // We don't need to care about tabs here as in this position they are
-    // equivalent to 4 spaces.
+    // equivalent to 4 spaces, which means we would not parse this as a
+    // hrule.
     if buf.head() == Some(&SP) { buf = buf.tail(); }
     if buf.head() == Some(&SP) { buf = buf.tail(); }
     if buf.head() == Some(&SP) { buf = buf.tail(); }
