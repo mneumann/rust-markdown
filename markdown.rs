@@ -83,7 +83,9 @@ fn is_hrule(buf: &[u8]) -> bool {
         return false;
     }
 
-    let mut cnt: uint = 0; // The count of '*', '-' or '_'
+    // The count of '*', '-' or '_'
+    let mut cnt: uint = 0;
+
     for &ch in buf.iter() {
         if ch == item {
             cnt += 1;
@@ -129,7 +131,6 @@ fn test_is_hrule() {
     assert_eq!(is_hrule(bytes!("______________")), true);
     assert_eq!(is_hrule(bytes!(" ______________")), true);
 }
-
 
 #[bench]
 fn bench_is_hrule(b: &mut BenchHarness) {
