@@ -89,6 +89,12 @@ fn test_is_hrule() {
     assert!(is_hrule(bytes!("___")).is_some());
     assert!(is_hrule(bytes!("______________")).is_some());
     assert!(is_hrule(bytes!(" ______________")).is_some());
+
+    // Test if the remaining buf actually works.
+    let s = bytes!("   * * *\nremaining");
+    let res = is_hrule(s);
+    assert!(res.is_some());
+    assert_eq!(res.unwrap(), bytes!("remaining"));
 }
 
 #[bench]
