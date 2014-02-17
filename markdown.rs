@@ -9,7 +9,7 @@ static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
 
 /// Returns true if the line is a horizontal rule.
-fn is_hrule(buf: &[u8]) -> bool {
+fn is_hrule_old(buf: &[u8]) -> bool {
     let len = buf.len();
 
     if len < 3 { return false }
@@ -41,6 +41,43 @@ fn is_hrule(buf: &[u8]) -> bool {
 
     let mut cnt: uint = 0; // The count of '*', '-' or '_'
     for &ch in buf.slice_from(pos).iter() {
+        if ch == item {
+            cnt += 1;
+        } else if ch == NL {
+            break;
+        } else if ch != SP {
+            return false;
+        }
+    }
+
+    return cnt >= 3;
+}
+
+/// Returns true if the line is a horizontal rule.
+fn is_hrule(buf: &[u8]) -> bool {
+    let mut buf = buf;
+
+    if buf.len() < 3 { return false }
+
+    // Skip up to three leading spaces.
+    //
+    // We don't need to care about tabs here as in this position they are
+    // equivalent to 4 spaces.
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+
+    // We need at least 3 items
+    if buf.len() < 3 { return false } 
+
+    let item = buf[0];
+
+    if !(item == ('*' as u8) || item == ('-' as u8) || item == ('_' as u8)) {
+        return false;
+    }
+
+    let mut cnt: uint = 0; // The count of '*', '-' or '_'
+    for &ch in buf.iter() {
         if ch == item {
             cnt += 1;
         } else if ch == NL {
@@ -86,8 +123,16 @@ fn test_is_hrule() {
     assert_eq!(is_hrule(bytes!(" ______________")), true);
 }
 
+
 #[bench]
 fn bench_is_hrule(b: &mut BenchHarness) {
     let s = bytes!("   * * * * * * * * * * * * * * * *\n");
     b.iter(|| is_hrule(s));
 }
+
+#[bench]
+fn bench_is_hrule_old(b: &mut BenchHarness) {
+    let s = bytes!("   * * * * * * * * * * * * * * * *\n");
+    b.iter(|| is_hrule_old(s));
+}
+
