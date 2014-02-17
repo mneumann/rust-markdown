@@ -1,5 +1,10 @@
 // This code is heavily inspired by hoedown.
 
+//
+// Performance observations:
+//
+// Note that buf.head() == Some(&ch) is much faster than buf[0] == ch.
+//
 
 extern crate extra;
 use extra::test::BenchHarness;
@@ -52,6 +57,8 @@ fn is_hrule_old(buf: &[u8]) -> bool {
 
     return cnt >= 3;
 }
+
+
 
 /// Returns true if the line is a horizontal rule.
 fn is_hrule(buf: &[u8]) -> bool {
