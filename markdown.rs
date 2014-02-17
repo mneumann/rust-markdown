@@ -15,8 +15,8 @@ static STAR: u8 = '*' as u8;
 static DASH: u8 = '-' as u8;
 static UNDERSCORE: u8 = '_' as u8;
 
-/// Returns Some(`rem`) if the line is a horizontal rule, with `rem` being the
-/// buf after the hrule. Otherwise returns None.
+/// Return Some(`rem`) if the line is a horizontal rule, with `rem` being the
+/// buf after the hrule. Otherwise return None.
 fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     let mut buf = buf;
 
