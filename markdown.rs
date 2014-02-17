@@ -12,9 +12,8 @@ use extra::test::BenchHarness;
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
 
-/// Returns Some(rem) if the line is a horizontal rule,
-/// with rest being the buf after the hrule.
-/// Otherwise returns None. 
+/// Returns Some(`rem`) if the line is a horizontal rule, with `rem` being the
+/// buf after the hrule. Otherwise returns None.
 fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     let mut buf = buf;
 
