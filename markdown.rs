@@ -12,11 +12,13 @@ use extra::test::BenchHarness;
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
 
-/// Returns true if the line is a horizontal rule.
-fn is_hrule(buf: &[u8]) -> bool {
+/// Returns Some(rem) if the line is a horizontal rule,
+/// with rest being the buf after the hrule.
+/// Otherwise returns None. 
+fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     let mut buf = buf;
 
-    if buf.len() < 3 { return false }
+    if buf.len() < 3 { return None }
 
     // Skip up to three leading spaces.
     //
@@ -28,61 +30,66 @@ fn is_hrule(buf: &[u8]) -> bool {
     if buf.head() == Some(&SP) { buf = buf.tail(); }
 
     // We need at least 3 items
-    if buf.len() < 3 { return false } 
+    if buf.len() < 3 { return None } 
 
     let item = buf[0];
 
     if !(item == ('*' as u8) || item == ('-' as u8) || item == ('_' as u8)) {
-        return false;
+        return None;
     }
 
     // The count of '*', '-' or '_'
     let mut cnt: uint = 0;
 
+    // Counts the consumed spaces (and the final NL)
+    let mut spc: uint = 0;
+
     for &ch in buf.iter() {
-        if ch == item {
-            cnt += 1;
-        } else if ch == NL {
-            break;
-        } else if ch != SP {
-            return false;
-        }
+        if      ch == item { cnt += 1; }
+        else if ch == NL   { spc += 1; break; }
+        else if ch == SP   { spc += 1; }
+        else               { return None; }
     }
 
-    return cnt >= 3;
+    if cnt >= 3 {
+        Some(buf.slice_from(cnt + spc))
+    } else {
+        None
+    }
 }
 
 #[test]
 fn test_is_hrule() {
     // examples as given on the markdown homepage
-    assert_eq!(is_hrule(bytes!("* * *\n")), true);
-    assert_eq!(is_hrule(bytes!("***\n")), true);
-    assert_eq!(is_hrule(bytes!("*****\n")), true);
-    assert_eq!(is_hrule(bytes!("- - -\n")), true);
-    assert_eq!(is_hrule(bytes!("---------------------------------------\n")), true);
+    assert!(is_hrule(bytes!("* * *\n")).is_some());
+    assert!(is_hrule(bytes!("***\n")).is_some());
+    assert!(is_hrule(bytes!("*****\n")).is_some());
+    assert!(is_hrule(bytes!("- - -\n")).is_some());
+    assert!(is_hrule(bytes!("---------------------------------------\n")).is_some());
 
     // up to three spaces ignored
-    assert_eq!(is_hrule(bytes!(" ***\n")), true);
-    assert_eq!(is_hrule(bytes!("  ***\n")), true);
-    assert_eq!(is_hrule(bytes!("   ***\n")), true);
+    assert!(is_hrule(bytes!(" ***\n")).is_some());
+    assert!(is_hrule(bytes!("  ***\n")).is_some());
+    assert!(is_hrule(bytes!("   ***\n")).is_some());
 
     // but not four, or a tab which is equivalent to four spaces
-    assert_eq!(is_hrule(bytes!("    ***\n")), false);
-    assert_eq!(is_hrule(bytes!("\t***\n")), false);
+
+    assert!(is_hrule(bytes!("    ***\n")).is_none());
+    assert!(is_hrule(bytes!("\t***\n")).is_none());
  
     // need at least three
-    assert_eq!(is_hrule(bytes!("*\n")), false);
-    assert_eq!(is_hrule(bytes!("**\n")), false);
-    assert_eq!(is_hrule(bytes!("* *\n")), false);
-    assert_eq!(is_hrule(bytes!("   * *\n")), false);
+    assert!(is_hrule(bytes!("*\n")).is_none());
+    assert!(is_hrule(bytes!("**\n")).is_none());
+    assert!(is_hrule(bytes!("* *\n")).is_none());
+    assert!(is_hrule(bytes!("   * *\n")).is_none());
 
     // Also works without newline at the end
-    assert_eq!(is_hrule(bytes!("* * *")), true);
+    assert!(is_hrule(bytes!("* * *")).is_some());
 
     // And underscores also supported
-    assert_eq!(is_hrule(bytes!("___")), true);
-    assert_eq!(is_hrule(bytes!("______________")), true);
-    assert_eq!(is_hrule(bytes!(" ______________")), true);
+    assert!(is_hrule(bytes!("___")).is_some());
+    assert!(is_hrule(bytes!("______________")).is_some());
+    assert!(is_hrule(bytes!(" ______________")).is_some());
 }
 
 #[bench]
