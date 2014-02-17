@@ -1,5 +1,10 @@
 // This code is heavily inspired by hoedown.
 
+
+extern crate extra;
+use extra::test::BenchHarness;
+
+
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
 
@@ -79,4 +84,10 @@ fn test_is_hrule() {
     assert_eq!(is_hrule(bytes!("___")), true);
     assert_eq!(is_hrule(bytes!("______________")), true);
     assert_eq!(is_hrule(bytes!(" ______________")), true);
+}
+
+#[bench]
+fn bench_is_hrule(b: &mut BenchHarness) {
+    let s = bytes!("   * * * * * * * * * * * * * * * *\n");
+    b.iter(|| is_hrule(s));
 }
