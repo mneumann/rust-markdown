@@ -28,9 +28,9 @@ static UNDERSCORE: u8 = '_' as u8;
 //
 fn skip_initial_three_spaces<'a>(buf: &'a[u8])-> &'a[u8] {
     let mut buf = buf;
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    if buf.head() == Some(&SP) { buf = buf.tail();
+    if buf.head() == Some(&SP) { buf = buf.tail();
+    if buf.head() == Some(&SP) { buf = buf.tail(); } } }
     return buf;
 }
 
