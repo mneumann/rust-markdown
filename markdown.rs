@@ -73,7 +73,6 @@ fn test_is_hrule() {
     assert!(is_hrule(bytes!("   ***\n")).is_some());
 
     // but not four, or a tab which is equivalent to four spaces
-
     assert!(is_hrule(bytes!("    ***\n")).is_none());
     assert!(is_hrule(bytes!("\t***\n")).is_none());
  
