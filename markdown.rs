@@ -6,9 +6,6 @@
 // Note that buf.head() == Some(&ch) is much faster than buf[0] == ch.
 //
 
-#[cfg(test)] extern crate extra;
-#[cfg(test)] use extra::test::BenchHarness;
-
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
 static CR: u8 = '\r' as u8;
@@ -105,12 +102,6 @@ fn test_is_hrule() {
     let res = is_hrule(s);
     assert!(res.is_some());
     assert_eq!(res.unwrap(), bytes!("remaining"));
-}
-
-#[bench]
-fn bench_is_hrule(b: &mut BenchHarness) {
-    let s = bytes!("   * * * * * * * * * * * * * * * *\n");
-    b.iter(|| is_hrule(s));
 }
 
 //
