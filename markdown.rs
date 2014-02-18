@@ -13,6 +13,8 @@ static TAB: u8 = '\t' as u8;
 static STAR: u8 = '*' as u8;
 static DASH: u8 = '-' as u8;
 static UNDERSCORE: u8 = '_' as u8;
+static TILDE: u8 = '~' as u8;
+static BACKTICK: u8 = '`' as u8;
 
 //
 // Skip up to three leading spaces.
@@ -146,3 +148,55 @@ fn test_is_empty() {
     assert!(res.is_some());
     assert_eq!(res.unwrap(), bytes!("remaining"));
 }
+
+fn is_codefence<'a>(buf: &'a[u8]) -> Option<(&'a[u8], uint, u8)> {
+    let buf = skip_initial_three_spaces(buf);
+
+    let item = match buf.head() {
+        Some(&c) if c == TILDE ||
+                    c == BACKTICK => c,
+        _                         => return None
+    };
+
+    // The count of '~' or '`' characters
+    let mut cnt: uint = 0;
+
+    for &ch in buf.iter() {
+        if ch == item { cnt += 1; }
+        else          { break; }
+    }
+
+    if cnt >= 3 {
+        Some((buf.slice_from(cnt), cnt, item))
+    } else {
+        None
+    }
+}
+
+#[test]
+fn test_is_codefence() {
+    assert!(is_codefence(bytes!("```")).is_some());
+    assert!(is_codefence(bytes!("~~~")).is_some());
+    assert!(is_codefence(bytes!("`````````")).is_some());
+    assert!(is_codefence(bytes!("~~~~")).is_some());
+    assert!(is_codefence(bytes!("   ```")).is_some());
+    assert!(is_codefence(bytes!("  ~~~")).is_some());
+
+    assert!(is_codefence(bytes!("  ~~")).is_none());
+    assert!(is_codefence(bytes!(" ``")).is_none());
+    assert!(is_codefence(bytes!("    ```")).is_none());
+    assert!(is_codefence(bytes!("\t```")).is_none());
+
+    // Test if the remaining buf actually works.
+    let s = bytes!("   ```remaining\n");
+    let res = is_codefence(s);
+    assert!(res.is_some());
+    assert_eq!(res.unwrap(), (bytes!("remaining\n"), 3, BACKTICK));
+
+    let s = bytes!("   ~~~~~~~~remaining\n");
+    let res = is_codefence(s);
+    assert!(res.is_some());
+    assert_eq!(res.unwrap(), (bytes!("remaining\n"), 8, TILDE));
+}
+
+
