@@ -11,6 +11,8 @@ use extra::test::BenchHarness;
 
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
+static CR: u8 = '\r' as u8;
+static TAB: u8 = '\t' as u8;
 static STAR: u8 = '*' as u8;
 static DASH: u8 = '-' as u8;
 static UNDERSCORE: u8 = '_' as u8;
@@ -100,4 +102,45 @@ fn test_is_hrule() {
 fn bench_is_hrule(b: &mut BenchHarness) {
     let s = bytes!("   * * * * * * * * * * * * * * * *\n");
     b.iter(|| is_hrule(s));
+}
+
+/// Return Some(`rem`) if the line is an empty line, with `rem` being the buf
+/// after the empty line. Otherwise return None.
+fn is_empty<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
+    let mut cnt: uint = 0;
+
+    for &ch in buf.iter() {
+        if      ch == NL  { cnt += 1; break; }
+        else if ch == CR  { cnt += 1; }
+        else if ch == SP  { cnt += 1; }
+        else if ch == TAB { cnt += 1; }
+        else              { return None; }
+    }
+
+    if cnt > 0 {
+        Some(buf.slice_from(cnt))
+    } else {
+        None
+    }
+}
+
+#[test]
+fn test_is_empty() {
+    assert!(is_empty(bytes!("\n")).is_some());
+    assert!(is_empty(bytes!("    \n")).is_some());
+    assert!(is_empty(bytes!("  \t  \n")).is_some());
+    assert!(is_empty(bytes!("  \t  \r\n")).is_some());
+    assert!(is_empty(bytes!("  \t  \nabc")).is_some());
+    assert!(is_empty(bytes!("  \t  ")).is_some());
+
+    assert!(is_empty(bytes!("a")).is_none());
+    assert!(is_empty(bytes!(" a")).is_none());
+    assert!(is_empty(bytes!(" a\n")).is_none());
+    assert!(is_empty(bytes!(" \ta\n")).is_none());
+
+    // Test if the remaining buf actually works.
+    let s = bytes!("   \t\r\nremaining");
+    let res = is_empty(s);
+    assert!(res.is_some());
+    assert_eq!(res.unwrap(), bytes!("remaining"));
 }
