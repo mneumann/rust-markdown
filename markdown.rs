@@ -6,8 +6,8 @@
 // Note that buf.head() == Some(&ch) is much faster than buf[0] == ch.
 //
 
-extern crate extra;
-use extra::test::BenchHarness;
+#[cfg(test)] extern crate extra;
+#[cfg(test)] use extra::test::BenchHarness;
 
 static SP: u8 = ' ' as u8;
 static NL: u8 = '\n' as u8;
@@ -17,19 +17,29 @@ static STAR: u8 = '*' as u8;
 static DASH: u8 = '-' as u8;
 static UNDERSCORE: u8 = '_' as u8;
 
-/// Return Some(`rem`) if the line is a horizontal rule, with `rem` being the
-/// buf after the hrule. Otherwise return None.
-fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
+//
+// Skip up to three leading spaces.
+//
+// Up to three leading spaces are allowed for many elements.
+//
+// We don't need to care about a TAB here as in this position it is equivalent
+// to 4 spaces, which means that when we find a TAB here we would not parse the
+// corresponding element.
+//
+fn skip_initial_three_spaces<'a>(buf: &'a[u8])-> &'a[u8] {
     let mut buf = buf;
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    if buf.head() == Some(&SP) { buf = buf.tail(); }
+    return buf;
+}
 
-    // Skip up to three leading spaces.
-    //
-    // We don't need to care about tabs here as in this position they are
-    // equivalent to 4 spaces, which means we would not parse this as a
-    // hrule.
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
-    if buf.head() == Some(&SP) { buf = buf.tail(); }
+//
+// Return Some(`rem`) if the line is a horizontal rule, with `rem` being the
+// buf after the hrule. Otherwise return None.
+//
+fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
+    let buf = skip_initial_three_spaces(buf);
 
     let item = match buf.head() {
         Some(&c) if c == STAR ||
@@ -103,8 +113,10 @@ fn bench_is_hrule(b: &mut BenchHarness) {
     b.iter(|| is_hrule(s));
 }
 
-/// Return Some(`rem`) if the line is an empty line, with `rem` being the buf
-/// after the empty line. Otherwise return None.
+//
+// Return Some(`rem`) if the line is an empty line, with `rem` being the buf
+// after the empty line. Otherwise return None.
+//
 fn is_empty<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
     let mut cnt: uint = 0;
 
