@@ -70,40 +70,40 @@ fn is_hrule<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
 #[test]
 fn test_is_hrule() {
     // examples as given on the markdown homepage
-    assert!(is_hrule(bytes!("* * *\n")).is_some());
-    assert!(is_hrule(bytes!("***\n")).is_some());
-    assert!(is_hrule(bytes!("*****\n")).is_some());
-    assert!(is_hrule(bytes!("- - -\n")).is_some());
-    assert!(is_hrule(bytes!("---------------------------------------\n")).is_some());
+    assert!(is_hrule(b"* * *\n").is_some());
+    assert!(is_hrule(b"***\n").is_some());
+    assert!(is_hrule(b"*****\n").is_some());
+    assert!(is_hrule(b"- - -\n").is_some());
+    assert!(is_hrule(b"---------------------------------------\n").is_some());
 
     // up to three spaces ignored
-    assert!(is_hrule(bytes!(" ***\n")).is_some());
-    assert!(is_hrule(bytes!("  ***\n")).is_some());
-    assert!(is_hrule(bytes!("   ***\n")).is_some());
+    assert!(is_hrule(b" ***\n").is_some());
+    assert!(is_hrule(b"  ***\n").is_some());
+    assert!(is_hrule(b"   ***\n").is_some());
 
     // but not four, or a tab which is equivalent to four spaces
-    assert!(is_hrule(bytes!("    ***\n")).is_none());
-    assert!(is_hrule(bytes!("\t***\n")).is_none());
+    assert!(is_hrule(b"    ***\n").is_none());
+    assert!(is_hrule(b"\t***\n").is_none());
  
     // need at least three
-    assert!(is_hrule(bytes!("*\n")).is_none());
-    assert!(is_hrule(bytes!("**\n")).is_none());
-    assert!(is_hrule(bytes!("* *\n")).is_none());
-    assert!(is_hrule(bytes!("   * *\n")).is_none());
+    assert!(is_hrule(b"*\n").is_none());
+    assert!(is_hrule(b"**\n").is_none());
+    assert!(is_hrule(b"* *\n").is_none());
+    assert!(is_hrule(b"   * *\n").is_none());
 
     // Also works without newline at the end
-    assert!(is_hrule(bytes!("* * *")).is_some());
+    assert!(is_hrule(b"* * *").is_some());
 
     // And underscores also supported
-    assert!(is_hrule(bytes!("___")).is_some());
-    assert!(is_hrule(bytes!("______________")).is_some());
-    assert!(is_hrule(bytes!(" ______________")).is_some());
+    assert!(is_hrule(b"___").is_some());
+    assert!(is_hrule(b"______________").is_some());
+    assert!(is_hrule(b" ______________").is_some());
 
     // Test if the remaining buf actually works.
-    let s = bytes!("   * * *\nremaining");
+    let s = b"   * * *\nremaining";
     let res = is_hrule(s);
     assert!(res.is_some());
-    assert_eq!(res.unwrap(), bytes!("remaining"));
+    assert_eq!(res.unwrap(), b"remaining");
 }
 
 //
@@ -130,23 +130,23 @@ fn is_empty<'a>(buf: &'a[u8]) -> Option<&'a[u8]> {
 
 #[test]
 fn test_is_empty() {
-    assert!(is_empty(bytes!("\n")).is_some());
-    assert!(is_empty(bytes!("    \n")).is_some());
-    assert!(is_empty(bytes!("  \t  \n")).is_some());
-    assert!(is_empty(bytes!("  \t  \r\n")).is_some());
-    assert!(is_empty(bytes!("  \t  \nabc")).is_some());
-    assert!(is_empty(bytes!("  \t  ")).is_some());
+    assert!(is_empty(b"\n").is_some());
+    assert!(is_empty(b"    \n").is_some());
+    assert!(is_empty(b"  \t  \n").is_some());
+    assert!(is_empty(b"  \t  \r\n").is_some());
+    assert!(is_empty(b"  \t  \nabc").is_some());
+    assert!(is_empty(b"  \t  ").is_some());
 
-    assert!(is_empty(bytes!("a")).is_none());
-    assert!(is_empty(bytes!(" a")).is_none());
-    assert!(is_empty(bytes!(" a\n")).is_none());
-    assert!(is_empty(bytes!(" \ta\n")).is_none());
+    assert!(is_empty(b"a").is_none());
+    assert!(is_empty(b" a").is_none());
+    assert!(is_empty(b" a\n").is_none());
+    assert!(is_empty(b" \ta\n").is_none());
 
     // Test if the remaining buf actually works.
-    let s = bytes!("   \t\r\nremaining");
+    let s = b"   \t\r\nremaining";
     let res = is_empty(s);
     assert!(res.is_some());
-    assert_eq!(res.unwrap(), bytes!("remaining"));
+    assert_eq!(res.unwrap(), b"remaining");
 }
 
 fn is_codefence<'a>(buf: &'a[u8]) -> Option<(&'a[u8], uint, u8)> {
@@ -175,28 +175,28 @@ fn is_codefence<'a>(buf: &'a[u8]) -> Option<(&'a[u8], uint, u8)> {
 
 #[test]
 fn test_is_codefence() {
-    assert!(is_codefence(bytes!("```")).is_some());
-    assert!(is_codefence(bytes!("~~~")).is_some());
-    assert!(is_codefence(bytes!("`````````")).is_some());
-    assert!(is_codefence(bytes!("~~~~")).is_some());
-    assert!(is_codefence(bytes!("   ```")).is_some());
-    assert!(is_codefence(bytes!("  ~~~")).is_some());
+    assert!(is_codefence(b"```").is_some());
+    assert!(is_codefence(b"~~~").is_some());
+    assert!(is_codefence(b"`````````").is_some());
+    assert!(is_codefence(b"~~~~").is_some());
+    assert!(is_codefence(b"   ```").is_some());
+    assert!(is_codefence(b"  ~~~").is_some());
 
-    assert!(is_codefence(bytes!("  ~~")).is_none());
-    assert!(is_codefence(bytes!(" ``")).is_none());
-    assert!(is_codefence(bytes!("    ```")).is_none());
-    assert!(is_codefence(bytes!("\t```")).is_none());
+    assert!(is_codefence(b"  ~~").is_none());
+    assert!(is_codefence(b" ``").is_none());
+    assert!(is_codefence(b"    ```").is_none());
+    assert!(is_codefence(b"\t```").is_none());
 
     // Test if the remaining buf actually works.
-    let s = bytes!("   ```remaining\n");
+    let s = b"   ```remaining\n";
     let res = is_codefence(s);
     assert!(res.is_some());
-    assert_eq!(res.unwrap(), (bytes!("remaining\n"), 3, BACKTICK));
+    assert_eq!(res.unwrap(), (b"remaining\n", 3, BACKTICK));
 
-    let s = bytes!("   ~~~~~~~~remaining\n");
+    let s = b"   ~~~~~~~~remaining\n";
     let res = is_codefence(s);
     assert!(res.is_some());
-    assert_eq!(res.unwrap(), (bytes!("remaining\n"), 8, TILDE));
+    assert_eq!(res.unwrap(), (b"remaining\n", 8, TILDE));
 }
 
 
