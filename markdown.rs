@@ -6,15 +6,15 @@
 // Note that buf.head() == Some(&ch) is much faster than buf[0] == ch.
 //
 
-static SP: u8 = ' ' as u8;
-static NL: u8 = '\n' as u8;
-static CR: u8 = '\r' as u8;
-static TAB: u8 = '\t' as u8;
-static STAR: u8 = '*' as u8;
-static DASH: u8 = '-' as u8;
-static UNDERSCORE: u8 = '_' as u8;
-static TILDE: u8 = '~' as u8;
-static BACKTICK: u8 = '`' as u8;
+static SP: u8 = b' ';
+static NL: u8 = b'\n';
+static CR: u8 = b'\r';
+static TAB: u8 = b'\t';
+static STAR: u8 = b'*';
+static DASH: u8 = b'-';
+static UNDERSCORE: u8 = b'_';
+static TILDE: u8 = b'~';
+static BACKTICK: u8 = b'`';
 
 //
 // Skip up to three leading spaces.
